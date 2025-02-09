@@ -1,6 +1,6 @@
 class Play extends Phaser.Scene {
     readonly Connections: { Update: CallableFunction[] } = { 
-        Update: [] 
+        Update: []
     }
     Background: {
         Layer0: Phaser.GameObjects.TileSprite,
