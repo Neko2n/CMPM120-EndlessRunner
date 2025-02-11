@@ -16,4 +16,4 @@ __Up-to-date files can be found in *docs/src/*. You do not need to run this file
     
 > tsconfig.json
 
-Used by *compile.bat*
+Used by *compile.bat* 
