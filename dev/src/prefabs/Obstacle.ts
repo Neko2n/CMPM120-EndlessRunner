@@ -1,55 +1,56 @@
-// Rocket prefab
-class Rocket extends Phaser.GameObjects.Sprite {
-    constructor(scene, x, y, texture, frame) {
-        super(scene, x, y, texture, frame)
-    
-        scene.add.existing(this)  // add to existing, displayList, updateList
-        this.isFiring = false     // track rocket's firing status
-        this.moveSpeed = game.settings.rocketSpeed     // In pixels/second
+// Obstacle prefab
+class Obstacle extends Phaser.GameObjects.Sprite {
 
-        this.sfxShot = scene.sound.add('sfx-shot')
-      
-        // bind mouse input
-        this.scene.input.on('pointermove', pointer => {
-            if (!this.isFiring && !this.scene.gameOver) this.x = pointer.x
-        }, this)
-        this.scene.input.on('pointerdown', () => {
-            if (!this.isFiring && !this.scene.gameOver) this.fire()
-        }, this)
+    readonly breakable: boolean
+
+    body: Phaser.Physics.Arcade.Body
+
+    constructor(scene: Phaser.Scene, x: number, y: number, breakable: boolean) {
+        super(scene, x, y, breakable ? 'obstacle-breakable' : 'obstacle')
+        
+        this.breakable = breakable
+
+        this.setScale(game.getScale()/2)
+
+        // Set physics
+        scene.physics.add.existing(this)
+        this.body.setCollideWorldBounds(false)
+        this.body.setImmovable(true)
+        this.body.setMaxVelocityY(0)
+        this.body.setFriction(0)
+        this.setOrigin(0, 1)
+        
+        // Add to scene
+        scene.add.existing(this)
     }
 
-    fire() {
-        this.isFiring = true
-        this.sfxShot.play()
+    break(perfect: boolean = false) {
+
+        // Break FX
+        this.scene.sound.play('sfx-break')
+        
+        // Perfect break FX
+        if (perfect) {
+            this.scene.sound.play('sfx-perfect')
+
+        }
+        
+        console.log("Obstacle broken! Perfect: ", perfect)
+        this.destroy()
     }
 
-    update(time, delta) {
-        // left/right movement
-        if(!this.isFiring) {
-            if(keys.LEFT.isDown && this.x >= borderUISize + this.width) {
-                this.x -= this.moveSpeed * (delta/1000)
-            } else if(keys.RIGHT.isDown && this.x <= game.config.width - borderUISize - this.width) {
-                this.x += this.moveSpeed * (delta/1000)
-            }
-        }
-        // fire button
-        if(Phaser.Input.Keyboard.JustDown(keys.FIRE) && !this.isFiring) {
-            this.fire()
-        }
-        // if fired, move up
-        if (this.isFiring && this.y >= borderUISize * 3 + borderPadding) {
-            this.y -= this.moveSpeed * (delta/1000)
-        }
-        // reset on miss
-        if (this.y <= borderUISize * 3 + borderPadding) {
-            this.reset()
-            this.scene.gameTime = Math.max(0, this.scene.gameTime - 4000)
+    // Hooked up to the scene's update function
+    update(time: any, delta: number) {
+        // Set speed
+        this.body.setVelocityX(-game.speed)
+
+        // Delete once off screen
+        if (this.x < 0 - this.displayWidth) {
+            this.destroy()
         }
     }
 
-    // reset rocket to "ground"
-    reset() {
-        this.isFiring = false
-        this.y = game.config.height - borderUISize - borderPadding
+    destroy(fromScene?: boolean) {
+        super.destroy(fromScene)
     }
   }

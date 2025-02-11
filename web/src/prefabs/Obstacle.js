@@ -13,58 +13,46 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-// Rocket prefab
-var Rocket = /** @class */ (function (_super) {
-    __extends(Rocket, _super);
-    function Rocket(scene, x, y, texture, frame) {
-        var _this = _super.call(this, scene, x, y, texture, frame) || this;
-        scene.add.existing(_this); // add to existing, displayList, updateList
-        _this.isFiring = false; // track rocket's firing status
-        _this.moveSpeed = game.settings.rocketSpeed; // In pixels/second
-        _this.sfxShot = scene.sound.add('sfx-shot');
-        // bind mouse input
-        _this.scene.input.on('pointermove', function (pointer) {
-            if (!_this.isFiring && !_this.scene.gameOver)
-                _this.x = pointer.x;
-        }, _this);
-        _this.scene.input.on('pointerdown', function () {
-            if (!_this.isFiring && !_this.scene.gameOver)
-                _this.fire();
-        }, _this);
+// Obstacle prefab
+var Obstacle = /** @class */ (function (_super) {
+    __extends(Obstacle, _super);
+    function Obstacle(scene, x, y, breakable) {
+        var _this = _super.call(this, scene, x, y, breakable ? 'obstacle-breakable' : 'obstacle') || this;
+        _this.breakable = breakable;
+        _this.setScale(game.getScale() / 2);
+        // Set physics
+        scene.physics.add.existing(_this);
+        _this.body.setCollideWorldBounds(false);
+        _this.body.setImmovable(true);
+        _this.body.setMaxVelocityY(0);
+        _this.body.setFriction(0);
+        _this.setOrigin(0, 1);
+        // Add to scene
+        scene.add.existing(_this);
         return _this;
     }
-    Rocket.prototype.fire = function () {
-        this.isFiring = true;
-        this.sfxShot.play();
+    Obstacle.prototype.break = function (perfect) {
+        if (perfect === void 0) { perfect = false; }
+        // Break FX
+        this.scene.sound.play('sfx-break');
+        // Perfect break FX
+        if (perfect) {
+            this.scene.sound.play('sfx-perfect');
+        }
+        console.log("Obstacle broken! Perfect: ", perfect);
+        this.destroy();
     };
-    Rocket.prototype.update = function (time, delta) {
-        // left/right movement
-        if (!this.isFiring) {
-            if (keys.LEFT.isDown && this.x >= borderUISize + this.width) {
-                this.x -= this.moveSpeed * (delta / 1000);
-            }
-            else if (keys.RIGHT.isDown && this.x <= game.config.width - borderUISize - this.width) {
-                this.x += this.moveSpeed * (delta / 1000);
-            }
-        }
-        // fire button
-        if (Phaser.Input.Keyboard.JustDown(keys.FIRE) && !this.isFiring) {
-            this.fire();
-        }
-        // if fired, move up
-        if (this.isFiring && this.y >= borderUISize * 3 + borderPadding) {
-            this.y -= this.moveSpeed * (delta / 1000);
-        }
-        // reset on miss
-        if (this.y <= borderUISize * 3 + borderPadding) {
-            this.reset();
-            this.scene.gameTime = Math.max(0, this.scene.gameTime - 4000);
+    // Hooked up to the scene's update function
+    Obstacle.prototype.update = function (time, delta) {
+        // Set speed
+        this.body.setVelocityX(-game.speed);
+        // Delete once off screen
+        if (this.x < 0 - this.displayWidth) {
+            this.destroy();
         }
     };
-    // reset rocket to "ground"
-    Rocket.prototype.reset = function () {
-        this.isFiring = false;
-        this.y = game.config.height - borderUISize - borderPadding;
+    Obstacle.prototype.destroy = function (fromScene) {
+        _super.prototype.destroy.call(this, fromScene);
     };
-    return Rocket;
+    return Obstacle;
 }(Phaser.GameObjects.Sprite));

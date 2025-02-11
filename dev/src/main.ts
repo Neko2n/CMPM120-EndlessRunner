@@ -1,38 +1,67 @@
-//  Title: Tag-Team
+//  Title: Box Buster
 //  Name: Niko DiStefano
 //  Date: 2/10/2025
-//  Hours (~): 12
+//  Hours (~): 20
 //
-//  I felt that adding an element of "switching" between two tracks
-//  not only increases user engagement by giving them two inputs rather than
-//  just one (the "jump" button), but forces them to look further ahead and
-//  be more on-edge about whether the track is going to force them to switch
-//  or not. In this regard, I think the tilt of Tag-Team makes it more engaging
-//  than a typical "dinosaur game" endless runner.
+//  I felt that adding an element of timing your key presses to
+//  "bust" boxes adds more engagement with the endless runner genre.
+//  It was fairly difficult to implement for someone who's new to using
+//  Phaser's Arcade physics--I'm pretty proud of how it turned out.
+//  Especially the "perfect timing" mechanic. The risk-reward of this
+//  mechanic makes the game especially fun.
 
 'use strict'
 
-let config = {
+const config = {
     type: Phaser.AUTO,
     width: 640,
     height: 480,
     physics: {
         default: 'arcade',
         arcade: {
-            debug: true
+            debug: false
         }
     },
     scene: [ Menu, Play ]
 }
 
-let game: Phaser.Game = new Phaser.Game(config)
+class Game extends Phaser.Game {
 
-let screen_width = game.config.width as number
-let screen_height = game.config.height as number
-let KEYS: {
-    SPACE: Phaser.Input.Keyboard.Key,   // Punch
-    W: Phaser.Input.Keyboard.Key,       // Jump
-    UP: Phaser.Input.Keyboard.Key,      // Jump
-    S: Phaser.Input.Keyboard.Key,       // Swap
-    DOWN: Phaser.Input.Keyboard.Key     // Swap
+    screen_width: number
+    screen_height: number
+    speed: number = 300
+
+    KEYS: {
+        SPACE: Phaser.Input.Keyboard.Key,   // Punch
+        W: Phaser.Input.Keyboard.Key,       // Jump
+        UP: Phaser.Input.Keyboard.Key,      // Jump
+        S: Phaser.Input.Keyboard.Key,       // Swap
+        DOWN: Phaser.Input.Keyboard.Key,    // Swap
+        F: Phaser.Input.Keyboard.Key,       // Attack
+        CTRL: Phaser.Input.Keyboard.Key     // Attack
+    }
+
+    constructor(config: Phaser.Types.Core.GameConfig) {
+        super(config)
+        this.screen_width = config.width as number
+        this.screen_height = config.height as number
+    }
+
+    public getScale() {
+        return 960 / this.screen_height
+    }
+
+    public setScene(scene: Phaser.Scene) {
+        this.KEYS = {
+            SPACE: scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
+            W: scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
+            UP: scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP),
+            S: scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
+            DOWN: scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN),
+            F: scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F),
+            CTRL: scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL)
+        }
+    }
 }
+
+const game: Game = new Game(config)

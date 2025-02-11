@@ -1,15 +1,30 @@
-//  Title: Tag-Team
+//  Title: Box Buster
 //  Name: Niko DiStefano
 //  Date: 2/10/2025
-//  Hours (~): 12
+//  Hours (~): 20
 //
-//  I felt that adding an element of "switching" between two tracks
-//  not only increases user engagement by giving them two inputs rather than
-//  just one (the "jump" button), but forces them to look further ahead and
-//  be more on-edge about whether the track is going to force them to switch
-//  or not. In this regard, I think the tilt of Tag-Team makes it more engaging
-//  than a typical "dinosaur game" endless runner.
+//  I felt that adding an element of timing your key presses to
+//  "bust" boxes adds more engagement with the endless runner genre.
+//  It was fairly difficult to implement for someone who's new to using
+//  Phaser's Arcade physics--I'm pretty proud of how it turned out.
+//  Especially the "perfect timing" mechanic. The risk-reward of this
+//  mechanic makes the game especially fun.
 'use strict';
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var config = {
     type: Phaser.AUTO,
     width: 640,
@@ -17,12 +32,34 @@ var config = {
     physics: {
         default: 'arcade',
         arcade: {
-            debug: true
+            debug: false
         }
     },
     scene: [Menu, Play]
 };
-var game = new Phaser.Game(config);
-var screen_width = game.config.width;
-var screen_height = game.config.height;
-var KEYS;
+var Game = /** @class */ (function (_super) {
+    __extends(Game, _super);
+    function Game(config) {
+        var _this = _super.call(this, config) || this;
+        _this.speed = 300;
+        _this.screen_width = config.width;
+        _this.screen_height = config.height;
+        return _this;
+    }
+    Game.prototype.getScale = function () {
+        return 960 / this.screen_height;
+    };
+    Game.prototype.setScene = function (scene) {
+        this.KEYS = {
+            SPACE: scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
+            W: scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
+            UP: scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP),
+            S: scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
+            DOWN: scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN),
+            F: scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F),
+            CTRL: scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL)
+        };
+    };
+    return Game;
+}(Phaser.Game));
+var game = new Game(config);
